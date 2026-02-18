@@ -8,6 +8,7 @@ display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame_icon = pygame.image.load("assets/images/explosion/2.png").convert_alpha()
 pygame.display.set_icon(pygame_icon)
 pygame.display.set_caption("space shooter by amnerysdev ˙⋆✮")
+clock = pygame.time.Clock()
 running = True 
 
 #Surfaces: text, img or plain areas.
@@ -16,7 +17,8 @@ coordinates = [(random.randint(0,WINDOW_WIDTH),random.randint(0,WINDOW_HEIGHT)) 
 
 player_surf = pygame.image.load("assets/images/player.png").convert_alpha()
 player_rect = player_surf.get_frect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
-player_movement = 1
+player_movement = pygame.math.Vector2(1,1)
+player_speed = 100 
 
 meteor_surf = pygame.image.load("assets/images/meteor.png").convert_alpha()
 meteor_rect = meteor_surf.get_frect(center= (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
@@ -27,10 +29,11 @@ laser_rect = laser_surf.get_frect(bottomleft= (20, WINDOW_HEIGHT-20))
 
 
 while running:
+    dt = clock.tick()/1000
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
              running = False
-    
+             
     #drawing the game :)
     display_surface.fill("darkgrey")
     for coordinate in coordinates:
@@ -40,11 +43,12 @@ while running:
     display_surface.blit(laser_surf, laser_rect)
     
     #player movement
-    player_rect.x += player_movement * 0.2
-    if (player_rect.right > WINDOW_WIDTH or player_rect.left < 0):
-       print(player_rect.right)
-       print(player_rect.left)
-       player_movement *= -1
+    player_rect.center+= player_speed * player_movement * dt
+    if player_rect.bottom > WINDOW_HEIGHT or player_rect.y < 0:
+        player_movement.y *= -1
+    if player_rect.right > WINDOW_WIDTH or player_rect.left < 0:
+        player_movement.x *= -1
+        
     display_surface.blit(player_surf, player_rect)
     
     
