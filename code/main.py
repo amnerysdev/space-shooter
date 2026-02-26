@@ -26,7 +26,8 @@ meteor_rect = meteor_surf.get_frect(center= (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 laser_surf = pygame.image.load("assets/images/laser.png").convert_alpha()
 laser_rect = laser_surf.get_frect(bottomleft= (20, WINDOW_HEIGHT-20))
 
-
+#state variable to check the status of a variable.
+key_status = False
 
 while running:
     dt = clock.tick()/1000
@@ -38,7 +39,15 @@ while running:
     keys = pygame.key.get_pressed()
     player_direction.x = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
     player_direction.y = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
+    player_direction = player_direction.normalize() if player_direction else player_direction
     player_rect.center +=  player_direction * player_speed * dt
+    if keys[pygame.K_SPACE]:
+        if not key_status:
+         key_status = True
+         print('fire laser')
+    else:
+          key_status = False  
+        
          
     #drawing the game :)
     display_surface.fill("darkgrey")
@@ -49,7 +58,7 @@ while running:
     display_surface.blit(laser_surf, laser_rect)  
     display_surface.blit(player_surf, player_rect)
     
-    
+
     pygame.display.update()
     
 pygame.quit()
