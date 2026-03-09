@@ -1,6 +1,29 @@
 import pygame
 import random
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.image = pygame.image.load("assets/images/player.png").convert_alpha()
+        self.rect  = self.image.get_frect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
+        self.player_direction = pygame.math.Vector2(0,0)
+        self.player_speed = 300   
+  
+    def update(self,dt):
+        keys = pygame.key.get_pressed()
+        self.player_direction.x = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
+        self.player_direction.y = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
+        self.player_direction = self.player_direction.normalize() if self.player_direction else self.player_direction
+        self.rect.center +=  self.player_direction * self.player_speed * dt
+
+class Star(pygame.sprite.Sprite):
+    def __init__(self, group, surf):
+        super().__init__(group)
+        self.image = surf
+        self.rect = self.image.get_frect(center = (random.randint(0,WINDOW_WIDTH), random.randint(0,WINDOW_HEIGHT)))
+    
+  
+    
 #initial pygame set up
 pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 760, 500
@@ -11,14 +34,14 @@ pygame.display.set_caption("space shooter by amnerysdev ˙⋆✮")
 clock = pygame.time.Clock()
 running = True 
 
-#Surfaces: text, img or plain areas.
-star_surf = pygame.image.load("assets/images/star.png").convert_alpha()
-coordinates = [(random.randint(0,WINDOW_WIDTH),random.randint(0,WINDOW_HEIGHT)) for _ in range(19)]
 
-player_surf = pygame.image.load("assets/images/player.png").convert_alpha()
-player_rect = player_surf.get_frect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
-player_direction = pygame.math.Vector2(0,0)
-player_speed = 100 
+star_surf = pygame.image.load("assets/images/star.png").convert_alpha()
+all_sprites = pygame.sprite.Group()
+for _ in range(20):
+    Star(all_sprites, star_surf)
+player = Player(all_sprites) 
+
+
 
 meteor_surf = pygame.image.load("assets/images/meteor.png").convert_alpha()
 meteor_rect = meteor_surf.get_frect(center= (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
@@ -35,30 +58,17 @@ while running:
         if event.type == pygame.QUIT:
              running = False
     
-    #player movement and input
-    keys = pygame.key.get_pressed()
-    player_direction.x = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
-    player_direction.y = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
-    player_direction = player_direction.normalize() if player_direction else player_direction
-    player_rect.center +=  player_direction * player_speed * dt
-    if keys[pygame.K_SPACE]:
-        if not key_status:
-         key_status = True
-         print('fire laser')
-    else:
-          key_status = False  
-        
          
     #drawing the game :)
     display_surface.fill("darkgrey")
-    for coordinate in coordinates:
-        display_surface.blit(star_surf, coordinate)
-        
+      
     display_surface.blit(meteor_surf, meteor_rect)
     display_surface.blit(laser_surf, laser_rect)  
-    display_surface.blit(player_surf, player_rect)
     
-
+    all_sprites.update(dt)
+    all_sprites.draw(display_surface)
+    
+    
     pygame.display.update()
     
 pygame.quit()
